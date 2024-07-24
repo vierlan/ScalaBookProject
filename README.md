@@ -1,10 +1,10 @@
 # Scala Play RESTful API
 
-## `Enter a brief description here`
+`Enter a brief description here`
 
 ## Running the project
 
-## `Enter instructions on how to run your application here`
+`Enter instructions on how to run your application here`
 
 ## Technologies
 
