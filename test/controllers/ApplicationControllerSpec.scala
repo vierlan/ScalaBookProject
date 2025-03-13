@@ -1,9 +1,10 @@
 package controllers
 
-import baseSpec.{BaseSpecWithApplication}
+import baseSpec.BaseSpecWithApplication
 import play.api.test.FakeRequest
 import play.api.http.Status
 import play.api.test.Helpers._
+import play.api.mvc.Results
 
 class ApplicationControllerSpec extends BaseSpecWithApplication {
 
@@ -15,8 +16,8 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
 
     val result = TestApplicationController.index()(FakeRequest())
 
-    "return TODO" in {
-      status(result) shouldBe Status.NOT_IMPLEMENTED
+    "return OK" in {
+      status(result) shouldBe Status.OK
     }
   }
 
@@ -24,7 +25,7 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
     val result = TestApplicationController.index()(FakeRequest())
 
     "return TODO" in {
-      status(result) shouldBe Status.NOT_IMPLEMENTED
+      status(result) shouldBe Status.OK
     }
   }
 
@@ -32,7 +33,7 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
     val result = TestApplicationController.index()(FakeRequest())
 
     "return TODO" in {
-      status(result) shouldBe Status.NOT_IMPLEMENTED
+      status(result) shouldBe Status.OK
     }
   }
 
@@ -40,7 +41,7 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
     val result = TestApplicationController.index()(FakeRequest())
 
     "return TODO" in {
-      status(result) shouldBe Status.NOT_IMPLEMENTED
+      status(result) shouldBe Status.OK
     }
   }
 
@@ -48,7 +49,7 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
     val result = TestApplicationController.index()(FakeRequest())
 
     "return TODO" in {
-      status(result) shouldBe Status.NOT_IMPLEMENTED
+      status(result) shouldBe Status.OK
     }
   }
 
