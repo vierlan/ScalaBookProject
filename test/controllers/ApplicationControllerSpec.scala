@@ -6,10 +6,7 @@ import play.api.test.FakeRequest
 import play.api.http.Status
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
-import play.api.mvc.{Result, Results}
-import repositories.DataRepository
-
-import javax.inject.Inject
+import play.api.mvc.Result
 import scala.concurrent.Future
 
 class ApplicationControllerSpec  extends BaseSpecWithApplication {
