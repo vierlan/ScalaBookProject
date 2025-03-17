@@ -35,21 +35,35 @@ class ApplicationController @Inject()(val controllerComponents: ControllerCompon
 
   def index(): Action[AnyContent] = Action.async { implicit request =>
     dataRepository.index().map{
-      case Right(item: Seq[DataModel]) => Ok {Json.toJson(item)}
-      case Left(error) => Status(error)(Json.toJson("Unable to find any books"))
+      case Right(item: Seq[DataModel]) => if (item.length < 1 ) {
+      BadRequest}
+      else
+     {Ok {Json.toJson(item)}}
+      case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
     }
   }
 
   def read(id: String): Action[AnyContent] = Action.async { implicit request =>
     dataRepository.read(id).map{
-      dataModel => Ok {Json.toJson(dataModel)}
+      case dataModel => Ok {Json.toJson(dataModel)}
+      case _ => BadRequest("book id does not exist")
     }
   }
-
-  def delete(id: String): Action[AnyContent] = Action.async { implicit request =>
-    dataRepository.delete(id).map{
-      case dataModel => Accepted
-      case _ => BadRequest("cannot delete book")
+  def delete(id:String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    request.body.validate[DataModel] match {
+      case JsSuccess(dataModel, _) =>  if (dataModel._id == id) {
+        dataRepository.create(dataModel).map(_ => Accepted)
+      }
+        else {
+          Future(BadRequest)
+        }
+      case JsError(_) => Future(BadRequest)
     }
   }
+//  def delete(id: String): Action[AnyContent] = Action.async { implicit request =>
+//    dataRepository.delete(id).map{
+//      case dataModel: DataModel =>
+//    }
+//    case _ => BadRequest
+//  }
 }
