@@ -4,12 +4,14 @@ import models.DataModel.DataModel
 import org.mongodb.scala.result
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
-import repositories.DataRepository.repositories.DataRepository
+import repositories.DataRepository
+import repositories.DataRepository.DataRepository
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import javax.inject.{Inject, Singleton}
 
-
+@Singleton
 class ApplicationController @Inject()(val controllerComponents: ControllerComponents, val dataRepository : DataRepository, implicit val ec: ExecutionContext) extends BaseController {
 
   def create(): Action[JsValue] = Action.async(parse.json) { implicit request =>
@@ -19,6 +21,7 @@ class ApplicationController @Inject()(val controllerComponents: ControllerCompon
       case JsError(_) => Future(BadRequest)
     }
   }
+
 
   def update(id: String): Action[JsValue] = Action.async (parse.json) { implicit request =>
     request.body.validate[DataModel] match {
@@ -40,16 +43,13 @@ class ApplicationController @Inject()(val controllerComponents: ControllerCompon
   def read(id: String): Action[AnyContent] = Action.async { implicit request =>
     dataRepository.read(id).map{
       dataModel => Ok {Json.toJson(dataModel)}
-      //case Left(error) => Status(error)(Json.toJson("Your book is book")
     }
   }
 
   def delete(id: String): Action[AnyContent] = Action.async { implicit request =>
     dataRepository.delete(id).map{
-      dataModel => Accepted
-      //case Left(error) => Status(error)(Json.toJson("Your book is book")
+      case dataModel => Accepted
+      case _ => BadRequest("cannot delete book")
     }
   }
-
-
 }
