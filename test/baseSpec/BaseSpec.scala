@@ -14,7 +14,7 @@ import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents}
 import play.api.test.CSRFTokenHelper.CSRFFRequestHeader
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{GET, POST}
-import repositories.DataRepository.repositories.DataRepository
+import repositories.DataRepository.DataRepository
 
 import scala.concurrent.ExecutionContext
 
