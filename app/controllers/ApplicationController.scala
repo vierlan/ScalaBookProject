@@ -45,7 +45,7 @@ class ApplicationController @Inject()(val controllerComponents: ControllerCompon
   def index(): Action[AnyContent] = Action.async { implicit request =>
     dataRepository.index().map{
       case Right(item: Seq[DataModel]) => if (item.length < 1 ) {
-      BadRequest}
+      BadRequest {Json.toJson(item)}}
       else
      {Ok {Json.toJson(item)}}
       case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
