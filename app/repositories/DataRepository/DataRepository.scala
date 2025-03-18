@@ -5,6 +5,7 @@ import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Filters.empty
 import org.mongodb.scala.model._
 import org.mongodb.scala.result
+import play.api.libs.json.JsError
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
@@ -41,19 +42,22 @@ class DataRepository @Inject()(
       Filters.equal("_id", id)
     )
 
-  def read(id: String): Future[DataModel] =
-    collection.find(byID(id)).headOption flatMap {
+  def read(id: String): Future[Either[JsError, DataModel]] =
+    collection.find(byID(id)).headOption.map {
       case Some(data) =>
-        println("additional test")
-        Future(data)
+        Right(data)
+      case _ => Left(JsError())
     }
 
-  def update(id: String, book: DataModel): Future[result.UpdateResult] =
+  def update(id: String, book: DataModel): Future[Either[JsError, result.UpdateResult]] =
     collection.replaceOne(
       filter = byID(id),
       replacement = book,
       options = new ReplaceOptions().upsert(true) //What happens when we set this to false?
-    ).toFuture()
+    ).toFuture().map(result => {
+      Right(result)}).recover {
+      case _ => Left(JsError())
+    }
 
   def delete(id: String): Future[result.DeleteResult] =
     collection.deleteOne(

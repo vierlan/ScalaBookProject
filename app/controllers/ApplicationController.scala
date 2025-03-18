@@ -23,23 +23,19 @@ class ApplicationController @Inject()(val controllerComponents: ControllerCompon
   }
 
   def read(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    request.body.validate[DataModel] match {
-      case JsSuccess(dataModel, _) =>  if (dataModel._id == id) {
-        println("test")
-        dataRepository.read(dataModel._id).map(_ => Ok)
-      }
-      else {
-        print("another test")
-        Future(BadRequest)
-      }
-      case JsError(_) => Future(BadRequest(Json.toJson("Unable to find any books")))
+        dataRepository.read(id).map {
+          case Right(data) => Ok(Json.toJson(data))
+          case Left(_) => BadRequest
+        }
     }
-  }
 
   def update(id: String): Action[JsValue] = Action.async (parse.json) { implicit request =>
     request.body.validate[DataModel] match {
-      case JsSuccess(dataModel, _) => dataRepository.update(id, dataModel).flatMap {
-        _=> dataRepository.read(id).map(book => Accepted {Json.toJson(book)})
+      case JsSuccess(dataModel, _) => dataRepository.update(id, dataModel).map {
+        case Right(_) =>
+          Accepted(Json.toJson(dataModel))
+        case Left(_) =>
+          BadRequest
       }
       case JsError(_) => Future(BadRequest)
     }
