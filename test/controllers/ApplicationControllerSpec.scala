@@ -65,21 +65,19 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
 
     "find a book in the database by id" in {
       beforeEach()
-      val request: FakeRequest[JsValue] = buildGet("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel))
+      val request: FakeRequest[JsValue] = buildPost("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel))
       val createdResult: Future[Result] = TestApplicationController.create()(request)
-
+      status(createdResult) shouldBe Status.CREATED
       val readResult: Future[Result] = TestApplicationController.read("abcd")(request)
 
       status(readResult) shouldBe Status.OK
-      println(contentAsJson(readResult).as[DataModel])
-      println(dataModel)
-      //contentAsJson(readResult).as[DataModel]._id shouldBe dataModel._id
+      contentAsJson(readResult).as[DataModel]._id shouldBe dataModel._id
       afterEach()
     }
 
     "return a bad request error when an id doesn't exist" in {
       beforeEach()
-      val request: FakeRequest[JsValue] = buildGet("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel))
+      val request: FakeRequest[JsValue] = buildPost("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel))
       val createdResult: Future[Result] = TestApplicationController.create()(request)
 
       val readResult: Future[Result] = TestApplicationController.read("abf")(request)
@@ -118,12 +116,14 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
 
     "update a book in the database by id" in {
       beforeEach()
-      val request: FakeRequest[JsValue] = buildGet("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel))
+      val request: FakeRequest[JsValue] = buildPost("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel))
       val createdResult: Future[Result] = TestApplicationController.create()(request)
+
       status(createdResult) shouldBe Status.CREATED
 
-      val updateRequest: FakeRequest[JsValue] = buildGet("/api/${dataModel._id}").withBody[JsValue](Json.toJson(updatedDataModel))
-      val updateResult: Future[Result] = TestApplicationController.update("abcd")(updateRequest)
+      val updateRequest: FakeRequest[JsValue] = buildPost("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel.copy(name="New name")))
+      val updateResult: Future[Result] = TestApplicationController.update(dataModel._id)(updateRequest)
+
       status(updateResult) shouldBe Status.ACCEPTED
       contentAsJson(updateResult).as[JsValue] shouldBe updateRequest.body
       afterEach()
@@ -131,14 +131,14 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
 
     "not update a book in the database by id" in {
       beforeEach()
-      val request: FakeRequest[JsValue] = buildGet("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel))
+      val request: FakeRequest[JsValue] = buildPost("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel))
       val createdResult: Future[Result] = TestApplicationController.create()(request)
       status(createdResult) shouldBe Status.CREATED
 
-      val updateRequest: FakeRequest[JsValue] = buildGet("/api/${dataModel._id}").withBody[JsValue](Json.toJson(updatedDataModel))
-      val updateResult: Future[Result] = TestApplicationController.update("abcd")(updateRequest)
-      status(updateResult) shouldBe Status.ACCEPTED
-      contentAsJson(updateResult).as[JsValue] shouldBe updateRequest.body
+      val updateRequest: FakeRequest[JsValue] = buildPost("/api/${dataModel._id}").withBody[JsValue](Json.toJson(updatedDataModel))
+      val updateResult: Future[Result] = TestApplicationController.update(dataModel._id)(updateRequest)
+
+      status(updateResult) shouldBe Status.BAD_REQUEST
       afterEach()
     }
   }
@@ -148,7 +148,8 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
     "find all book in the database" in {
       beforeEach()
       val request: FakeRequest[JsValue] = buildGet("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel))
-
+      val createdResult: Future[Result] = TestApplicationController.create()(request)
+      status(createdResult) shouldBe Status.CREATED
       val indexResult: Future[Result] = TestApplicationController.index()(FakeRequest())
 
       status(indexResult) shouldBe Status.OK
