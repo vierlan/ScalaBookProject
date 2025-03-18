@@ -22,6 +22,19 @@ class ApplicationController @Inject()(val controllerComponents: ControllerCompon
     }
   }
 
+  def read(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    request.body.validate[DataModel] match {
+      case JsSuccess(dataModel, _) =>  if (dataModel._id == id) {
+        println("test")
+        dataRepository.read(dataModel._id).map(_ => Ok)
+      }
+      else {
+        print("another test")
+        Future(BadRequest)
+      }
+      case JsError(_) => Future(BadRequest(Json.toJson("Unable to find any books")))
+    }
+  }
 
   def update(id: String): Action[JsValue] = Action.async (parse.json) { implicit request =>
     request.body.validate[DataModel] match {
@@ -43,12 +56,13 @@ class ApplicationController @Inject()(val controllerComponents: ControllerCompon
     }
   }
 
-  def read(id: String): Action[AnyContent] = Action.async { implicit request =>
-    dataRepository.read(id).map{
-      case dataModel => Ok {Json.toJson(dataModel)}
-      case _ => BadRequest("book id does not exist")
-    }
-  }
+//  def read(id: String): Action[AnyContent] = Action.async { implicit request =>
+//    dataRepository.read(id).map{
+//      case dataModel => Ok {Json.toJson(dataModel)}
+//      case _ => BadRequest("book id does not exist")
+//    }
+//  }
+
   def delete(id:String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[DataModel] match {
       case JsSuccess(dataModel, _) =>  if (dataModel._id == id) {

@@ -44,6 +44,7 @@ class DataRepository @Inject()(
   def read(id: String): Future[DataModel] =
     collection.find(byID(id)).headOption flatMap {
       case Some(data) =>
+        println("additional test")
         Future(data)
     }
 
