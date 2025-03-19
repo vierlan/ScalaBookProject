@@ -165,7 +165,9 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
   }
 
   "getGoogleBook" should {
-
+    beforeEach()
+    val url =
+    afterEach()
   }
   override def beforeEach(): Unit = await(repository.deleteAll())
   override def afterEach(): Unit = await(repository.deleteAll())

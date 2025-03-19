@@ -1,6 +1,5 @@
-package services
+package models
 
-import models.DataModel
 import play.api.libs.json.{Json, OFormat}
 
 
@@ -11,7 +10,7 @@ case class Book(
 }
 
 object Book {
-  implicit val formats: OFormat[DataModel] = Json.format[DataModel]
+  implicit val formats: OFormat[Book] = Json.format[Book]
 }
 
 
