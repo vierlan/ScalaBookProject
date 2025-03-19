@@ -13,7 +13,7 @@ import scala.concurrent.Future
 class ApplicationControllerSpec extends BaseSpecWithApplication {
 
   val TestApplicationController = new ApplicationController(
-    component, repository, executionContext)
+    component, repository, service, executionContext)
 
   private val dataModel: DataModel = DataModel(
     "abcd",
@@ -67,7 +67,7 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
       val request: FakeRequest[JsValue] = buildPost("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel))
       val createdResult: Future[Result] = TestApplicationController.create()(request)
       status(createdResult) shouldBe Status.CREATED
-      val readResult: Future[Result] = TestApplicationController.read("abcd")(request)
+      val readResult: Future[Result] = TestApplicationController.read("abcd")(FakeRequest())
 
       status(readResult) shouldBe Status.OK
       contentAsJson(readResult).as[DataModel] shouldBe dataModel
@@ -79,8 +79,7 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
       val request: FakeRequest[JsValue] = buildPost("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel))
       val createdResult: Future[Result] = TestApplicationController.create()(request)
 
-      val readResult: Future[Result] = TestApplicationController.read("abf")(request)
-
+      val readResult: Future[Result] = TestApplicationController.read("abf")(FakeRequest())
       status(readResult) shouldBe Status.BAD_REQUEST
       //contentAsJson(readResult).as[DataModel] shouldBe dataModel
       afterEach()
@@ -164,11 +163,7 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
     }
   }
 
-  "getGoogleBook" should {
-    beforeEach()
-    val url =
-    afterEach()
-  }
+
   override def beforeEach(): Unit = await(repository.deleteAll())
   override def afterEach(): Unit = await(repository.deleteAll())
 

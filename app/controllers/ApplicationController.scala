@@ -4,7 +4,7 @@ import models.DataModel
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
 import repositories.DataRepository
-import services.ApplicationService
+import services.LibraryService
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -14,7 +14,7 @@ import javax.inject.Singleton
 class ApplicationController @Inject()(
                                        val controllerComponents: ControllerComponents,
                                        val dataRepository : DataRepository,
-                                       val service : ApplicationService,
+                                       val service : LibraryService,
                                        implicit val ec: ExecutionContext) extends BaseController {
 
   def create(): Action[JsValue] = Action.async(parse.json) { implicit request =>
