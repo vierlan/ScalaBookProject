@@ -7,7 +7,6 @@ import play.api.http.Status
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.Helpers._
-import views.html.defaultpages.error
 
 import scala.concurrent.Future
 
@@ -71,7 +70,7 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
       val readResult: Future[Result] = TestApplicationController.read("abcd")(request)
 
       status(readResult) shouldBe Status.OK
-      contentAsJson(readResult).as[DataModel]._id shouldBe dataModel._id
+      contentAsJson(readResult).as[DataModel] shouldBe dataModel
       afterEach()
     }
 
@@ -163,6 +162,12 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
       status(indexResult) shouldBe Status.BAD_REQUEST
       afterEach()
     }
+  }
+
+  "getGoogleBook" should {
+    beforeEach()
+    val url =
+    afterEach()
   }
   override def beforeEach(): Unit = await(repository.deleteAll())
   override def afterEach(): Unit = await(repository.deleteAll())

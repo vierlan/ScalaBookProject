@@ -1,4 +1,4 @@
-package repositories.DataRepository
+package repositories
 
 import models.DataModel
 import org.mongodb.scala.bson.conversions.Bson
