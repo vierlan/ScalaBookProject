@@ -1,19 +1,21 @@
 package controllers
 
 import models.DataModel
-import org.mongodb.scala.result
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
 import repositories.DataRepository
-import repositories.DataRepository.DataRepository
 import services.ApplicationService
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import javax.inject.{Inject, Singleton}
+import javax.inject.Singleton
 
 @Singleton
-class ApplicationController @Inject()(val controllerComponents: ControllerComponents, val dataRepository : DataRepository, implicit val ec: ExecutionContext, val service : ApplicationService) extends BaseController {
+class ApplicationController @Inject()(
+                                       val controllerComponents: ControllerComponents,
+                                       val dataRepository : DataRepository,
+                                       val service : ApplicationService,
+                                       implicit val ec: ExecutionContext) extends BaseController {
 
   def create(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[DataModel] match {
@@ -26,7 +28,7 @@ class ApplicationController @Inject()(val controllerComponents: ControllerCompon
   def read(id: String): Action[AnyContent] = Action.async { implicit request =>
         dataRepository.read(id).map {
           case Right(data) => Ok(Json.toJson(data))
-          case Left(_) => BadRequest
+          case Left(_) => BadRequest("Bad request")
         }
     }
 
@@ -40,25 +42,17 @@ class ApplicationController @Inject()(val controllerComponents: ControllerCompon
       }
       case JsError(_) => Future(BadRequest)
     }
-    }
-
+  }
 
   def index(): Action[AnyContent] = Action.async { implicit request =>
     dataRepository.index().map{
       case Right(item: Seq[DataModel]) => if (item.length < 1 ) {
-      BadRequest {Json.toJson(item)}}
+      BadRequest}
       else
      {Ok {Json.toJson(item)}}
       case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
     }
   }
-
-//  def read(id: String): Action[AnyContent] = Action.async { implicit request =>
-//    dataRepository.read(id).map{
-//      case dataModel => Ok {Json.toJson(dataModel)}
-//      case _ => BadRequest("book id does not exist")
-//    }
-//  }
 
   def delete(id:String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[DataModel] match {
@@ -73,17 +67,9 @@ class ApplicationController @Inject()(val controllerComponents: ControllerCompon
   }
 
   def getGoogleBook(search: String, term: String): Action[AnyContent] = Action.async { implicit request =>
-    service.getGoogleBook(search = search, term = term).map {
-      book => Ok (Json.toJson(book))
+    service.getGoogleBook(search = search, term = term).map  { book => Ok (Json.toJson(book))
     }.recover {
-        case e: Exception => BadRequest ("No book")
-      }
+      case e: Exception => InternalServerError(Json.obj("error" -> e.getMessage)) // ✅ Handle errors gracefully
+    }
   }
 }
-
-//case Some (book) => Ok (Json.toJson(book
-//  case None => NoBook ("No book found")
-//
-//case Right(data) => Ok(Json.toJson(data))
-//case Left(_) => BadRequest
-////case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
