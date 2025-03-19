@@ -1,18 +1,19 @@
 package controllers
 
-import models.DataModel.DataModel
+import models.DataModel
 import org.mongodb.scala.result
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
 import repositories.DataRepository
 import repositories.DataRepository.DataRepository
+import services.ApplicationService
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class ApplicationController @Inject()(val controllerComponents: ControllerComponents, val dataRepository : DataRepository, implicit val ec: ExecutionContext) extends BaseController {
+class ApplicationController @Inject()(val controllerComponents: ControllerComponents, val dataRepository : DataRepository, implicit val ec: ExecutionContext, val service : ApplicationService) extends BaseController {
 
   def create(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[DataModel] match {
@@ -22,7 +23,7 @@ class ApplicationController @Inject()(val controllerComponents: ControllerCompon
     }
   }
 
-  def read(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def read(id: String): Action[AnyContent] = Action.async { implicit request =>
         dataRepository.read(id).map {
           case Right(data) => Ok(Json.toJson(data))
           case Left(_) => BadRequest
@@ -70,10 +71,19 @@ class ApplicationController @Inject()(val controllerComponents: ControllerCompon
       case JsError(_) => Future(BadRequest)
     }
   }
-//  def delete(id: String): Action[AnyContent] = Action.async { implicit request =>
-//    dataRepository.delete(id).map{
-//      case dataModel: DataModel =>
-//    }
-//    case _ => BadRequest
-//  }
+
+  def getGoogleBook(search: String, term: String): Action[AnyContent] = Action.async { implicit request =>
+    service.getGoogleBook(search = search, term = term).map {
+      book => Ok (Json.toJson(book))
+    }.recover {
+        case e: Exception => BadRequest ("No book")
+      }
+  }
 }
+
+//case Some (book) => Ok (Json.toJson(book
+//  case None => NoBook ("No book found")
+//
+//case Right(data) => Ok(Json.toJson(data))
+//case Left(_) => BadRequest
+////case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
