@@ -2,7 +2,9 @@
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "2.13.8"
+
 libraryDependencies += ws
+
 lazy val root = (project in file("."))
   .settings(
     name := "FullStackTemplate"
@@ -17,8 +19,6 @@ libraryDependencies ++= Seq(
   "org.scalatest"          %% "scalatest"               % "3.2.15"             % Test,
   "org.scalamock"          %% "scalamock"               % "5.2.0"             % Test,
   "org.scalatestplus.play" %% "scalatestplus-play"   % "5.1.0"          % Test
-
-
 
 )
 
