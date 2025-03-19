@@ -1,6 +1,6 @@
 package repositories.DataRepository
 
-import models.DataModel.DataModel
+import models.DataModel
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Filters.empty
 import org.mongodb.scala.model._
