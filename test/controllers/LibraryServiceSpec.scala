@@ -25,13 +25,15 @@ class LibraryServiceSpec extends BaseSpec with MockFactory with ScalaFutures wit
     val url: String = "testUrl"
 
     "return a book" in {
-      (mockConnector.get[JsValue](_: String)(_: OFormat[JsValue], _: ExecutionContext))
+      val testing = (mockConnector.get[Book](_: String)(_: OFormat[Book], _: ExecutionContext))
         .expects(url, *, *)
-        .returning(Future(gameOfThrones.as[JsValue]))
+        .returning(Future(gameOfThrones.as[Book]))
         .once()
 
+      println(testing)
+
       whenReady(testService.getGoogleBook(urlOverride = Some(url), search = "", term = "")) { result =>
-        result shouldBe gameOfThrones
+        result shouldBe gameOfThrones.as[Book]
       }
     }
   }
