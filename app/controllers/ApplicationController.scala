@@ -1,5 +1,6 @@
 package controllers
 
+import akka.util.Helpers.Requiring
 import models.DataModel
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
@@ -66,11 +67,9 @@ class ApplicationController @Inject()(
     }
   }
 
-  def getGoogleBook(search: String, term: String): Action[AnyContent] = Action.async { implicit request =>
-    println("request")
-    service.getGoogleBook(search = search, term = term).map  { book => Ok (Json.toJson(book))
-    }.recover {
-      case e: Exception => InternalServerError(Json.obj("error" -> e.getMessage))
+  def getGoogleBook(search: String, term: String): Action[AnyContent] = Action.async { implicit request => service.getGoogleBook(search = search, term = term).value.map {
+    case Right(book) => Ok (Json.toJson(book))
+      case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
     }
   }
 }
