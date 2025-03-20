@@ -4,8 +4,8 @@ import play.api.libs.json.{Json, OFormat}
 
 
 case class Book(
-                 authors: List[String],
-                 title: String) {
+                 name: String,
+                 description: String) {
 
 }
 
