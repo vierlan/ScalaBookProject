@@ -1,7 +1,7 @@
 package controllers
 
 import akka.util.Helpers.Requiring
-import models.DataModel
+import models.{APIError, DataModel}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
 import repositories.DataRepository
@@ -39,16 +39,16 @@ class ApplicationController @Inject()(
         case Right(_) =>
           Accepted(Json.toJson(dataModel))
         case Left(_) =>
-          BadRequest
+          BadRequest("Cannot update")
       }
-      case JsError(_) => Future(BadRequest)
+      case JsError(_) => Future(BadRequest("Cannot update"))
     }
   }
 
   def index(): Action[AnyContent] = Action.async { implicit request =>
     dataRepository.index().map{
       case Right(item: Seq[DataModel]) => if (item.length < 1 ) {
-      BadRequest}
+      BadRequest("Unable to find any books")}
       else
      {Ok {Json.toJson(item)}}
       case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
@@ -61,9 +61,9 @@ class ApplicationController @Inject()(
         dataRepository.create(dataModel).map(_ => Accepted)
       }
         else {
-          Future(BadRequest)
+          Future(BadRequest("cannot delete"))
         }
-      case JsError(_) => Future(BadRequest)
+      case JsError(_) => Future(BadRequest("cannot delete"))
     }
   }
 

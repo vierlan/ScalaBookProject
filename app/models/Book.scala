@@ -4,7 +4,9 @@ import play.api.libs.json.{Json, OFormat}
 
 
 case class Book(
-                 name: String,
+                  isbn: String,
+                 title: String,
+                  pageCount: Int,
                  description: String) {
 
 }
