@@ -6,7 +6,7 @@ import play.api.libs.json.{Json, OFormat}
 
 
 case class DataModel(_id: String,
-                       title: String,
+                       name: String,
                        description: String,
                        pageCount: Int)
 /**
@@ -30,6 +30,14 @@ let books =
 
 object DataModel {
   implicit val formats: OFormat[DataModel] = Json.format[DataModel]
+  def toBook(dataModel: DataModel): Book = {
+    Book(
+      isbn = dataModel._id,
+      title = dataModel.name,
+      description = dataModel.description,
+      pageCount = dataModel.pageCount
+    )
+  }
 //  val dataModelForms: Form[DataModel] = Form(
 //    mapping(
 //      "_id" -> text,

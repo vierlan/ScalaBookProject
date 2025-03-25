@@ -16,6 +16,7 @@ class LibraryConnector @Inject()(ws: WSClient) {
       response
         .map {
           result =>
+            println(result)
             Right(result.json.as[Response])
         }
         .recover { case _: WSResponse =>
