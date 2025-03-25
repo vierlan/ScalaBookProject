@@ -5,7 +5,7 @@ import models.{APIError, DataModel}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
 import repositories.DataRepository
-import services.LibraryService
+import services.{LibraryService, RepositoryService}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,6 +16,7 @@ class ApplicationController @Inject()(
                                        val controllerComponents: ControllerComponents,
                                        val dataRepository : DataRepository,
                                        val service : LibraryService,
+                                       val repositoryService: RepositoryService)(
                                        implicit val ec: ExecutionContext) extends BaseController {
 
   def create(): Action[JsValue] = Action.async(parse.json) { implicit request =>
@@ -27,7 +28,7 @@ class ApplicationController @Inject()(
   }
 
   def read(id: String): Action[AnyContent] = Action.async { implicit request =>
-        dataRepository.read(id).map {
+    repositoryService.read(id).map {
           case Right(data) => Ok(Json.toJson(data))
           case Left(_) => BadRequest("Bad request")
         }
@@ -35,7 +36,7 @@ class ApplicationController @Inject()(
 
   def update(id: String): Action[JsValue] = Action.async (parse.json) { implicit request =>
     request.body.validate[DataModel] match {
-      case JsSuccess(dataModel, _) => dataRepository.update(id, dataModel).map {
+      case JsSuccess(dataModel, _) => repositoryService.update(id, dataModel).map {
         case Right(_) =>
           Accepted(Json.toJson(dataModel))
         case Left(_) =>
@@ -46,7 +47,7 @@ class ApplicationController @Inject()(
   }
 
   def index(): Action[AnyContent] = Action.async { implicit request =>
-    dataRepository.index().map{
+    repositoryService.index().map {
       case Right(item: Seq[DataModel]) => if (item.length < 1 ) {
       BadRequest("Unable to find any books")}
       else
@@ -58,7 +59,7 @@ class ApplicationController @Inject()(
   def delete(id:String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[DataModel] match {
       case JsSuccess(dataModel, _) =>  if (dataModel._id == id) {
-        dataRepository.create(dataModel).map(_ => Accepted)
+        repositoryService.create(dataModel).map(_ => Accepted)
       }
         else {
           Future(BadRequest("cannot delete"))
@@ -72,4 +73,5 @@ class ApplicationController @Inject()(
       case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
     }
   }
+
 }

@@ -2,6 +2,7 @@ package controllers
 
 import baseSpec.BaseSpecWithApplication
 import models.DataModel
+import org.apache.bcel.Repository
 import play.api.test.FakeRequest
 import play.api.http.Status
 import play.api.libs.json.{JsValue, Json}
@@ -13,7 +14,8 @@ import scala.concurrent.Future
 class ApplicationControllerSpec extends BaseSpecWithApplication {
 
   val TestApplicationController = new ApplicationController(
-    component, repository, service, executionContext)
+    component, repository, service, repoService)(executionContext)
+
 
   private val dataModel: DataModel = DataModel(
     "abcd",
@@ -119,7 +121,7 @@ class ApplicationControllerSpec extends BaseSpecWithApplication {
 
       status(createdResult) shouldBe Status.CREATED
 
-      val updateRequest: FakeRequest[JsValue] = buildPost("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel.copy(name="New name")))
+      val updateRequest: FakeRequest[JsValue] = buildPost("/api/${dataModel._id}").withBody[JsValue](Json.toJson(dataModel.copy(title="New name")))
       val updateResult: Future[Result] = TestApplicationController.update(dataModel._id)(updateRequest)
 
       status(updateResult) shouldBe Status.ACCEPTED
