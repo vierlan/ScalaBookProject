@@ -25,14 +25,32 @@ class UserController @Inject()(
     }
   }
 
-  def read(id: Int): Action[AnyContent] = Action.async { implicit request =>
+  def login: Action[AnyContent] = Action {
+    Ok(views.html.login())
+  }
+
+  def validateLogin: Action[AnyContent] = Action { request =>
+    val loginVals = request.body.asFormUrlEncoded
+    Ok(views.html.userPage())
+  }
+
+  def createUser(): Action[JsValue] = Action.async(parse.json) { request =>
+    request.body.validate[User].fold(
+      errors => Future.successful(BadRequest(Json.obj("message" -> "Invalid JSON"))),
+      user => {
+        userRepository.create(user).map(createdUser => Created(Json.toJson(createdUser)))
+      }
+    )
+  }
+
+  def read(id: String): Action[AnyContent] = Action.async { implicit request =>
     userRepository.read(id).map {
       case Right(data) => Ok(Json.toJson(data))
       case Left(_) => BadRequest("Bad request")
     }
   }
 
-  def update(id: Int): Action[JsValue] = Action.async (parse.json) { implicit request =>
+  def update(id: String): Action[JsValue] = Action.async (parse.json) { implicit request =>
     request.body.validate[User] match {
       case JsSuccess(user, _) => userRepository.update(id, user).map {
         case Right(_) =>
@@ -54,24 +72,10 @@ class UserController @Inject()(
     }
   }
 
-  def delete(id: Int): Action[AnyContent] = Action.async {
+  def delete(id: String): Action[AnyContent] = Action.async {
     userRepository.delete(id).map {
       case result if result.getDeletedCount > 0 => Accepted
       case _ => NotFound(s"User with ID $id not found")
     }
   }
-
-//  def delete(id: Int): Action[JsValue] = Action.async(parse.json) { implicit request =>
-//    request.body.validate[User] match {
-//      case JsSuccess(user, _) => {
-//        if (user._id.contains(id)) {
-//          userRepository.delete(((user._id))).map(_ => Accepted)
-//        }
-//        else {
-//          Future(BadRequest("cannot delete"))
-//        }
-//      }
-//      case JsError(_) => Future(BadRequest("cannot delete"))
-//    }
-//  }
 }

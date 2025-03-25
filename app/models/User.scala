@@ -1,10 +1,12 @@
 package models
 
 import play.api.libs.json.{Json, OFormat}
+import reactivemongo.api.bson.BSONObjectID
 
 case class User(
-                 _id: Option[Int],       // Option[Int] to handle auto-generated IDs
-                 name: String
+                 _id: Option[String],  // MongoDB ObjectID
+                 name: String,
+                 books: Option[List[Book]]
                )
 
 

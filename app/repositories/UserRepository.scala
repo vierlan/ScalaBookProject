@@ -6,6 +6,7 @@ import org.mongodb.scala.model.Filters.empty
 import org.mongodb.scala.model._
 import org.mongodb.scala.result
 import play.api.libs.json.JsError
+import reactivemongo.api.bson.BSONObjectID
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
@@ -31,24 +32,26 @@ class UserRepository @Inject()(
       case _ => Left(APIError.BadAPIResponse(404, "User cannot be found"))
     }
 
-  def create(user: User): Future[User] =
+  def create(user: User): Future[User] = {
+    val userWithId = user.copy(_id = Some(BSONObjectID.generate().stringify), books = Some(List.empty))
     collection
-      .insertOne(user)
+      .insertOne(userWithId)
       .toFuture()
-      .map(_ => user)
+      .map(_ => userWithId)
+  }
 
-  private def byID(id: Int): Bson =
+  private def byID(id: String): Bson =
     Filters.and(
       Filters.equal("_id", id)
     )
 
-  def read(id: Int): Future[Either[APIError.BadAPIResponse, User]] =
+  def read(id: String): Future[Either[APIError.BadAPIResponse, User]] =
     collection.find(byID(id)).headOption.map {
       case Some(data) => Right(data)
-      case _ => Left(APIError.BadAPIResponse(404, "Book cannot be found"))
+      case _ => Left(APIError.BadAPIResponse(404, "User cannot be found"))
     }
 
-  def update(id: Int, user: User): Future[Either[APIError.BadAPIResponse, result.UpdateResult]] =
+  def update(id: String, user: User): Future[Either[APIError.BadAPIResponse, result.UpdateResult]] =
     collection.replaceOne(
       filter = byID(id),
       replacement = user,
@@ -63,7 +66,7 @@ class UserRepository @Inject()(
     }
 
 
-  def delete(id: Int): Future[result.DeleteResult] =
+  def delete(id: String): Future[result.DeleteResult] =
     collection.deleteOne(
       filter = byID(id)
     ).toFuture()

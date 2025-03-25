@@ -4,6 +4,7 @@ GET     /                           controllers.HomeController.index()
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
+
 GET     /api     controllers.ApplicationController.index
 POST     /api/create     controllers.ApplicationController.create
 GET     /api/read/:id     controllers.ApplicationController.read(id: String)
@@ -12,7 +13,9 @@ DELETE     /api/delete/:id   controllers.ApplicationController.delete(id: String
 
 GET     /users     controllers.UserController.index
 POST     /user/create     controllers.UserController.create
-DELETE     /user/delete/:id   controllers.UserController.delete(id: Int)
+GET     /login     controllers.UserController.login
+POST     /validateUser     controllers.UserController.validateLogin
+DELETE     /user/delete/:id   controllers.UserController.delete(id: String)
 
 
 
