@@ -1,5 +1,6 @@
 package repositories
 
+import com.google.inject.ImplementedBy
 import models.{APIError, DataModel}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Filters.empty
@@ -11,6 +12,7 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+
 
 @Singleton
 class DataRepository @Inject()(
@@ -37,7 +39,7 @@ class DataRepository @Inject()(
       .toFuture()
       .map(_ => book)
 
-  private def byID(id: String): Bson =
+  def byID(id: String): Bson =
     Filters.and(
       Filters.equal("_id", id)
     )
@@ -52,7 +54,7 @@ class DataRepository @Inject()(
     collection.replaceOne(
       filter = byID(id),
       replacement = book,
-      options = new ReplaceOptions().upsert(true) //What happens when we set this to false?
+      options = new ReplaceOptions().upsert(true)
     ).toFuture().map(result => {
       Right(result)}).recover {
       case _ => Left(APIError.BadAPIResponse(404, "Book cannot be updated"))
@@ -65,4 +67,5 @@ class DataRepository @Inject()(
 
   def deleteAll(): Future[Unit] = collection.deleteMany(empty()).toFuture().map(_ => ()) //Hint: needed for tests
 
+  def getData: String = "Data from repository"
 }

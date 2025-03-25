@@ -5,7 +5,7 @@ import models.{APIError, DataModel}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
 import repositories.DataRepository
-import services.LibraryService
+import services.{LibraryService, RepositoryService}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,6 +16,7 @@ class ApplicationController @Inject()(
                                        val controllerComponents: ControllerComponents,
                                        val dataRepository : DataRepository,
                                        val service : LibraryService,
+                                       val repositoryService: RepositoryService,
                                        implicit val ec: ExecutionContext) extends BaseController {
 
   def create(): Action[JsValue] = Action.async(parse.json) { implicit request =>
@@ -72,4 +73,5 @@ class ApplicationController @Inject()(
       case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
     }
   }
+
 }
