@@ -13,19 +13,39 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@ImplementedBy(classOf[DataRepository])
+trait DataRepositoryTrait {
+
+  def index(): Future[Either[APIError.BadAPIResponse, Seq[DataModel]]]
+
+  def create(book: DataModel): Future[Either[APIError.BadAPIResponse, DataModel]]
+
+//  def readByName(name: String): Future[Either[APIError.BadAPIResponse, Option[DataModel]]]
+
+  def read(id: String): Future[Either[APIError.BadAPIResponse, Option[DataModel]]]
+
+  def update(id: String, book: DataModel): Future[Either[APIError.BadAPIResponse, result.UpdateResult]]
+
+  //def updateField(id: String, field: String, value: String): Future[Either[APIError.BadAPIResponse, result.UpdateResult]]
+
+  def delete(id: String): Future[Either[APIError.BadAPIResponse, result.DeleteResult]]
+
+  //def readByISBN(isbn: String): Future[Either[APIError.BadAPIResponse, Option[DataModel]]]
+
+}
+
+
 
 @Singleton
-class DataRepository @Inject()(
+class DataRepository @Inject() (
                                 mongoComponent: MongoComponent
-                              )(implicit ec: ExecutionContext) extends PlayMongoRepository[DataModel](
+                              ) (implicit ec: ExecutionContext) extends PlayMongoRepository[DataModel] (
   collectionName = "dataModels",
   mongoComponent = mongoComponent,
   domainFormat = DataModel.formats,
-  indexes = Seq(IndexModel(
-    Indexes.ascending("_id")
-  )),
+  indexes = Seq(IndexModel(Indexes.ascending("_id"))),
   replaceIndexes = false
-) {
+) with DataRepositoryTrait {
 
   def index(): Future[Either[APIError.BadAPIResponse, Seq[DataModel]]]  =
     collection.find().toFuture().map{
@@ -33,20 +53,20 @@ class DataRepository @Inject()(
       case _ => Left(APIError.BadAPIResponse(404, "Books cannot be found"))
     }
 
-  def create(book: DataModel): Future[DataModel] =
+  def create(book: DataModel): Future[Either[APIError.BadAPIResponse, DataModel]] =
     collection
       .insertOne(book)
       .toFuture()
-      .map(_ => book)
+      .map(_ => Right(book))
 
   def byID(id: String): Bson =
     Filters.and(
       Filters.equal("_id", id)
     )
 
-  def read(id: String): Future[Either[APIError.BadAPIResponse, DataModel]] =
+  def read(id: String): Future[Either[APIError.BadAPIResponse, Option[DataModel]]] =
     collection.find(byID(id)).headOption.map {
-      case Some(data) => Right(data)
+      case Some(data) => Right(Some(data))
       case _ => Left(APIError.BadAPIResponse(404, "Book cannot be found"))
     }
 
@@ -60,12 +80,11 @@ class DataRepository @Inject()(
       case _ => Left(APIError.BadAPIResponse(404, "Book cannot be updated"))
     }
 
-  def delete(id: String): Future[result.DeleteResult] =
+  def delete(id: String): Future[Either[APIError.BadAPIResponse,result.DeleteResult]] =
     collection.deleteOne(
       filter = byID(id)
-    ).toFuture()
+    ).toFuture().map(Right(_)) // Do validation here instead of this.
 
   def deleteAll(): Future[Unit] = collection.deleteMany(empty()).toFuture().map(_ => ()) //Hint: needed for tests
 
-  def getData: String = "Data from repository"
 }
