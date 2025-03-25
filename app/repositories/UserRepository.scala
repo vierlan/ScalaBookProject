@@ -37,18 +37,18 @@ class UserRepository @Inject()(
       .toFuture()
       .map(_ => user)
 
-  private def byID(id: String): Bson =
+  private def byID(id: Int): Bson =
     Filters.and(
       Filters.equal("_id", id)
     )
 
-  def read(id: String): Future[Either[APIError.BadAPIResponse, User]] =
+  def read(id: Int): Future[Either[APIError.BadAPIResponse, User]] =
     collection.find(byID(id)).headOption.map {
       case Some(data) => Right(data)
       case _ => Left(APIError.BadAPIResponse(404, "Book cannot be found"))
     }
 
-  def update(id: String, user: User): Future[Either[APIError.BadAPIResponse, result.UpdateResult]] =
+  def update(id: Int, user: User): Future[Either[APIError.BadAPIResponse, result.UpdateResult]] =
     collection.replaceOne(
       filter = byID(id),
       replacement = user,
@@ -63,7 +63,7 @@ class UserRepository @Inject()(
     }
 
 
-  def delete(id: String): Future[result.DeleteResult] =
+  def delete(id: Int): Future[result.DeleteResult] =
     collection.deleteOne(
       filter = byID(id)
     ).toFuture()

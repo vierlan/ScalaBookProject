@@ -3,10 +3,8 @@ package models
 import play.api.libs.json.{Json, OFormat}
 
 case class User(
-                 id: Option[Int],       // Option[Int] to handle auto-generated IDs
-                 name: String,
-                 email: String,
-                 age: Int
+                 _id: Option[Int],       // Option[Int] to handle auto-generated IDs
+                 name: String
                )
 
 
