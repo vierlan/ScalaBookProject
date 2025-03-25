@@ -54,18 +54,10 @@ class UserController @Inject()(
     }
   }
 
-  def delete(id: Int): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    request.body.validate[User] match {
-      case JsSuccess(user, _) =>
-        user._id match {
-          case Some(userId) if userId == id =>
-            userRepository.delete(id).map { result =>
-              if (result.getDeletedCount > 0) Accepted
-              else NotFound("User not found")
-            }
-          case _ => Future.successful(BadRequest("ID mismatch"))
-        }
-      case JsError(_) => Future.successful(BadRequest("Invalid JSON format"))
+  def delete(id: Int): Action[AnyContent] = Action.async {
+    userRepository.delete(id).map {
+      case result if result.getDeletedCount > 0 => Accepted
+      case _ => NotFound(s"User with ID $id not found")
     }
   }
 
