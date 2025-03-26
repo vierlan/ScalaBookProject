@@ -76,6 +76,13 @@ class ApplicationController @Inject()(
     }
   }
 
+  def hobbit(): Action[AnyContent] = Action { implicit request =>
+      Ok(views.html.hobbit())
+    }
+
+
+  }
+
 
   def googleBookSearch(search: String): Action[AnyContent] = Action.async { implicit request =>
 
@@ -89,3 +96,4 @@ class ApplicationController @Inject()(
 //  }
 
 }
+
