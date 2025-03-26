@@ -1,0 +1,32 @@
+@(userId: String, username: String, books: Seq[models.Book])(implicit request: RequestHeader)
+
+@main("My Books") {
+  <div class="container">
+    <h1>Welcome, @username!</h1>
+    
+    <h2>My Books</h2>
+    
+    @if(books.isEmpty) {
+      <p>You haven't added any books to your collection yet.</p>
+      <a href="@routes.HomeController.index()" class="btn">Search for Books</a>
+    } else {
+      <div class="book-grid">
+        @for(book <- books) {
+          <div class="book-card">
+            <img src="@book.thumbnailUrl" alt="@book.title cover">
+            <h3>@book.title</h3>
+            <p>Pages: @book.pageCount</p>
+            <p>@if(book.description.length > 100) {@book.description.substring(0, 100)}... else {@book.description}</p>
+            
+            <form action="@routes.BookController.removeFromFavorites()" method="POST">
+              @helper.CSRF.formField
+              <input type="hidden" name="isbn" value="@book.isbn">
+              <button type="submit" class="btn">Remove</button>
+            </form>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}
+
