@@ -7,7 +7,7 @@ case class Book(
                   isbn: String,
                  title: String,
                   pageCount: Int,
-//                  thumbnailUrl: String,
+                 thumbnailUrl: String,
                  description: String,
 
                ) {
@@ -30,6 +30,7 @@ object Book {
       _id = book.isbn,
       name = book.title,
       description = book.description,
+      thumbnailUrl = book.thumbnailUrl,
       pageCount = book.pageCount
     )
   }

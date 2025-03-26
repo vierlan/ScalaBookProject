@@ -1,6 +1,8 @@
 package controllers
 
+import controllers.routes
 import models.{APIError, User}
+import play.api.data.Form
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
 import repositories.UserRepository
@@ -12,10 +14,10 @@ import javax.inject.Singleton
 
 @Singleton
 class UserController @Inject()(
-                                       val controllerComponents: ControllerComponents,
-                                       val userRepository : UserRepository,
-                                       val userService: UserService,
-                                       implicit val ec: ExecutionContext) extends BaseController {
+                                val controllerComponents: ControllerComponents,
+                                val userRepository : UserRepository,
+                                val userService: UserService,
+                                implicit val ec: ExecutionContext) extends BaseController {
 
   def create(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[User] match {
@@ -25,11 +27,56 @@ class UserController @Inject()(
     }
   }
 
-  def login(): Action[AnyContent] = Action {
+  def registerPage(): Action[AnyContent] = Action { implicit request =>
+    Ok(views.html.register())
+  }
+
+  def register(): Action[AnyContent] = Action.async { implicit request =>
+    val formData = request.body.asFormUrlEncoded
+
+    formData match {
+      case Some(data) =>
+        val usernameOpt = data.get("username").flatMap(_.headOption)
+        val passwordOpt = data.get("password").flatMap(_.headOption)
+
+        (usernameOpt, passwordOpt) match {
+          case (Some(username), Some(password)) =>
+            // Check if username already exists
+            userRepository.index().flatMap {
+              case Right(users) =>
+                if (users.exists(_.username == username)) {
+                  Future.successful(Redirect(routes.UserController.registerPage())
+                    .flashing("error" -> "Username already exists"))
+                } else {
+                  val newUser = User(None, username, password, None)
+                  userRepository.create(newUser).map { user =>
+                    Redirect(routes.UserController.login)
+                      .flashing("success" -> "Registration successful. Please login.")
+                  }
+                }
+              case Left(_) =>
+                // If we can't check existing users, proceed with registration
+                val newUser = User(None, username, password, None)
+                userRepository.create(newUser).map { user =>
+                  Redirect(routes.UserController.login)
+                    .flashing("success" -> "Registration successful. Please login.")
+                }
+            }
+          case _ =>
+            Future.successful(Redirect(routes.UserController.registerPage())
+              .flashing("error" -> "Please provide both username and password"))
+        }
+      case None =>
+        Future.successful(Redirect(routes.UserController.registerPage())
+          .flashing("error" -> "Invalid registration request"))
+    }
+  }
+
+  def login(): Action[AnyContent] = Action { implicit request =>
     Ok(views.html.login())
   }
 
-  def validateLogin: Action[AnyContent] = Action.async (parse.anyContent) { request =>
+  def validateLogin(): Action[AnyContent] = Action.async { implicit request =>
     val loginVals = request.body.asFormUrlEncoded
 
     // Extract login credentials (e.g., username and password)
@@ -43,50 +90,50 @@ class UserController @Inject()(
             // Validate the user (this could involve querying the repository)
             userRepository.validateCredentials(username, password).map {
               case Some(user) =>
-                // Redirect to the userPage with the user object
-                Redirect(routes.UserController.userPage()).flashing(
-                  "userID" -> user._id, // You could pass the user ID or any other user data
-                  "username" -> user.name
-                )
+                // Create a session with the user ID
+                Redirect(routes.UserController.userPage)
+                  .withSession("userId" -> user._id.getOrElse(""), "username" -> user.username)
               case None =>
                 // Invalid login attempt
-                Redirect(routes.UserController.login.flashing(
-                  "error" -> "Invalid username or password"
-                )
+                Redirect(routes.UserController.login)
+                  .flashing("error" -> "Invalid username or password")
             }
           case _ =>
             // Missing credentials
             Future.successful(
-              Redirect(routes.UserController.login()).flashing(
-                "error" -> "Please provide both username and password"
-              )
+              Redirect(routes.UserController.login)
+                .flashing("error" -> "Please provide both username and password")
             )
         }
       case None =>
         // Invalid request payload
         Future.successful(
-          Redirect(routes.UserController.login()).flashing(
-            "error" -> "Invalid login request"
-          )
+          Redirect(routes.UserController.login)
+            .flashing("error" -> "Invalid login request")
         )
     }
   }
 
+  def logout(): Action[AnyContent] = Action { implicit request =>
+    Redirect(routes.HomeController.index()).withNewSession
+      .flashing("success" -> "You have been logged out")
+  }
 
-  def userPage(): Action[AnyContent] = Action { request =>
-    // Extract flashed data (userID, username, etc.)
-    val userID = request.flash.get("userID")
-    val username = request.flash.get("username")
-
-    userID match {
-      case Some(id) =>
-        // Render the userPage with the user details
-        Ok(views.html.userPage(id, username.getOrElse("Unknown User")))
+  def userPage(): Action[AnyContent] = Action.async { implicit request =>
+    request.session.get("userId") match {
+      case Some(userId) =>
+        userRepository.read(userId).map {
+          case Right(user) =>
+            val books = user.books.getOrElse(List.empty)
+            Ok(views.html.userPage(userId, user.username, books))
+          case Left(_) =>
+            Redirect(routes.UserController.login)
+              .flashing("error" -> "User not found. Please login again")
+              .withNewSession
+        }
       case None =>
-        // If user data is missing, redirect back to login
-        Redirect(routes.UserController.login()).flashing(
-          "error" -> "User information missing"
-        )
+        Future.successful(Redirect(routes.UserController.login)
+          .flashing("error" -> "You must be logged in to view this page"))
     }
   }
 
@@ -112,10 +159,10 @@ class UserController @Inject()(
   def index(): Action[AnyContent] = Action.async { implicit request =>
     userRepository.index().map{
       case Right(item: Seq[User]) => if (item.length < 1 ) {
-        BadRequest("Unable to find any books")}
+        BadRequest("Unable to find any users")}
       else
       {Ok {Json.toJson(item)}}
-      case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
+      case Left(_) => BadRequest(Json.toJson("Unable to find any users"))
     }
   }
 
@@ -126,3 +173,4 @@ class UserController @Inject()(
     }
   }
 }
+

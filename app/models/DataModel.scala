@@ -8,7 +8,7 @@ import play.api.libs.json.{Json, OFormat}
 case class DataModel(_id: String,
                        name: String,
                        description: String,
-//                     thumbnailUrl: String,
+                     thumbnailUrl: String,
                        pageCount: Int,
                     )
 /**
@@ -37,6 +37,7 @@ object DataModel {
       isbn = dataModel._id,
       title = dataModel.name,
       description = dataModel.description,
+      thumbnailUrl = dataModel.thumbnailUrl,
       pageCount = dataModel.pageCount
     )
   }

@@ -21,3 +21,29 @@ GET     /userPage     controllers.UserController.userPage
 
 
 GET     /library/google/:search/:term      controllers.ApplicationController.getGoogleBook(search: String, term: String)
+
+# Home page
+GET     /                           controllers.HomeController.index()
+GET     /search                     controllers.HomeController.search()
+
+# User management
+GET     /register                   controllers.UserController.registerPage()
+POST    /register                   controllers.UserController.register()
+GET     /login                      controllers.UserController.login()
+POST    /login                      controllers.UserController.validateLogin()
+GET     /logout                     controllers.UserController.logout()
+GET     /user                       controllers.UserController.userPage()
+
+# Book management
+POST    /books/add                  controllers.BookController.addToFavorites()
+POST    /books/remove               controllers.BookController.removeFromFavorites()
+
+# API endpoints
+GET     /api/users                  controllers.UserController.index()
+GET     /api/users/:id              controllers.UserController.read(id: String)
+POST    /api/users                  controllers.UserController.create()
+PUT     /api/users/:id              controllers.UserController.update(id: String)
+DELETE  /api/users/:id              controllers.UserController.delete(id: String)
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
