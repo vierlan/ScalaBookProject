@@ -1,7 +1,7 @@
 package services
 
 import connectors.LibraryConnector
-import models.{APIError, Book, DataModel, GoogleBooksResponse, IndustryIdentifier}
+import models.{APIError, Book, GoogleBook,ResultList, GoogleBooksResponse, IndustryIdentifier}
 import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
 import cats.data.EitherT
 import cats.implicits.toUnorderedFoldableOps
@@ -14,8 +14,8 @@ import javax.inject.Singleton
 @Singleton
 class LibraryService @Inject()(connector: LibraryConnector) {
 
-  def getGoogleBook(urlOverride: Option[String] = None, search: String, term: String)(implicit ec: ExecutionContext): EitherT[Future, APIError, Book] =
-    connector.get[Book](urlOverride.getOrElse(s"https://www.googleapis.com/books/v1/volumes?q=$search%$term"))
+  def getGoogleBook(urlOverride: Option[String] = None, search: String)(implicit ec: ExecutionContext): EitherT[Future, APIError, ResultList] =
+    connector.get[ResultList](urlOverride.getOrElse(s"https://www.googleapis.com/books/v1/volumes?q=$search:intitle"))
 
   def findISBN(identifiers: Seq[IndustryIdentifier]):String = {
     identifiers.find(_.`type` == "ISBN_13").map(_.identifier)
@@ -29,10 +29,16 @@ class LibraryService @Inject()(connector: LibraryConnector) {
     val max = s"maxResults=$maxResults"
     val query = s"$search:$formattedTerm"
     val url = s"https://www.googleapis.com/books/v1/volumes?q=$query&$maxResults&$orderBy"
+
+    println(s"I am making a request to the Url: $url")
+
     val result = connector.get[GoogleBooksResponse](url)
 
     result.map { googleBooksResponse =>
       googleBooksResponse.items.map { googleBook =>
+
+        println(s"here is the book you wanted: ${googleBook.volumeInfo.title}")
+
         Book(
           isbn = googleBook.volumeInfo.industryIdentifiers.find(_.`type` == "ISBN_13").map(_.identifier).getOrElse(""),
           title = googleBook.volumeInfo.title,

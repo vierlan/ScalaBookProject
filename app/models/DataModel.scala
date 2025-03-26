@@ -1,4 +1,6 @@
 package models
+import play.api.data._
+import play.api.data.Forms._
 
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, text}
@@ -6,11 +8,9 @@ import play.api.libs.json.{Json, OFormat}
 
 
 case class DataModel(_id: String,
-                       name: String,
+                       title: String,
                        description: String,
-                     thumbnailUrl: String,
-                       pageCount: Int,
-                    )
+                       pageCount: Int)
 /**
 let books =
 [
@@ -32,16 +32,21 @@ let books =
 
 object DataModel {
   implicit val formats: OFormat[DataModel] = Json.format[DataModel]
-  def toBook(dataModel: DataModel): Book = {
-    Book(
-      isbn = dataModel._id,
-      title = dataModel.name,
-      description = dataModel.description,
-      thumbnailUrl = dataModel.thumbnailUrl,
-      pageCount = dataModel.pageCount
-    )
-  }
-//  val dataModelForms: Form[DataModel] = Form(
+
+//  case class Person(name: String, surname: String, age: Int)
+//  object Person {
+//    implicit val formats: OFormat[Person] = Json.format[Person]
+//
+//    val personForm: Form[Person] = Form(
+//      mapping(
+//        "name" -> text,
+//        "surname" -> text,
+//        "age" -> number
+//      )(Person.apply)(Person.unapply)
+//    )
+//  }
+
+  //  val dataModelForms: Form[DataModel] = Form(
 //    mapping(
 //      "_id" -> text,
 //      "title" -> text,
@@ -51,4 +56,3 @@ object DataModel {
 //
 //  )
 }
-

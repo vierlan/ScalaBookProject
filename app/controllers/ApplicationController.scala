@@ -29,12 +29,12 @@ class ApplicationController @Inject()(
 
   def read(id: String): Action[AnyContent] = Action.async { implicit request =>
     repositoryService.read(id).map {
-          case Right(data) => Ok(Json.toJson(data))
-          case Left(_) => BadRequest("Bad request")
-        }
+      case Right(data) => Ok(Json.toJson(data))
+      case Left(_) => BadRequest("Bad request")
     }
+  }
 
-  def update(id: String): Action[JsValue] = Action.async (parse.json) { implicit request =>
+  def update(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[DataModel] match {
       case JsSuccess(dataModel, _) => repositoryService.update(id, dataModel).map {
         case Right(_) =>
@@ -48,30 +48,48 @@ class ApplicationController @Inject()(
 
   def index(): Action[AnyContent] = Action.async { implicit request =>
     repositoryService.index().map {
-      case Right(item: Seq[DataModel]) => if (item.length < 1 ) {
-      BadRequest("Unable to find any books")}
-      else
-     {Ok {Json.toJson(item)}}
+      case Right(item: Seq[DataModel]) => if (item.length < 1) {
+        BadRequest("Unable to find any books")
+      }
+      else {
+        Ok(views.html.example(item))
+      }
       case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
     }
   }
 
-  def delete(id:String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def delete(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[DataModel] match {
-      case JsSuccess(dataModel, _) =>  if (dataModel._id == id) {
+      case JsSuccess(dataModel, _) => if (dataModel._id == id) {
         repositoryService.create(dataModel).map(_ => Accepted)
       }
-        else {
-          Future(BadRequest("cannot delete"))
-        }
+      else {
+        Future(BadRequest("cannot delete"))
+      }
       case JsError(_) => Future(BadRequest("cannot delete"))
     }
   }
 
-  def getGoogleBook(search: String, term: String): Action[AnyContent] = Action.async { implicit request => service.getGoogleBook(search = search, term = term).value.map {
-    case Right(book) => Ok (Json.toJson(book))
+  def getGoogleBook(search: String): Action[AnyContent] = Action.async { implicit request =>
+
+    service.getGoogleBook(search = search).value.map {
+      case Right(book) => Ok(Json.toJson(book))
       case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
     }
   }
 
+  def hobbit(): Action[AnyContent] = Action { implicit request =>
+    Ok(views.html.hobbit())
+  }
+
+
+  def googleBookSearch(search: String): Action[AnyContent] = Action.async { implicit request =>
+
+    service.getGoogleBook(search = search).value.map {
+      case Right(book) => Ok(views.html.searchResults(book))
+      case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
+    }
+  }
 }
+
+

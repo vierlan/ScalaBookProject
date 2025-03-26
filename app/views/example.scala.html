@@ -1,29 +1,23 @@
-@(bookList: ResultList)
+@(bookList: Seq[DataModel])
 
-@main("Search Results"){
-
-<h1>Book Results</h1>
+@main("Find Book"){
+<h1>Google Book Api Project</h1>
 <div class="container h-100 d-flex justify-content-center ">
 
     <div class="p-5 mb-4 bg-secondary-subtle rounded-3 ">
         <div class="container-fluid py-5 ">
 
             <div class="row justify-content-center">
-                @bookList.items.take(20).map{ book =>
+                @bookList.take(3).map{ book =>
                 <div class="card p-4 " style="width: 18rem; ">
-                    <img src="@(book.volumeInfo.imageLinks match{
-                        case Some(n) => n.thumbnail
-                        case None => "https://code-artisan.io/wp-content/uploads/2020/12/default_book_cover_2015.jpg"
-                    })"
-                    class="card-img-top" alt="...">
                     <div class="card-body">
 
-                        <h5 class="card-title">@book.volumeInfo.title
+                        <h5 class="card-title">@book.title
                         </h5>
                     </div>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item">Page Count: @book.volumeInfo.pageCount
-                        </li>
+                        <li class="list-group-item">Page Count: book.pageCount
+                            </li>
                     </ul>
                     <div class="card-body">
                         <button type="button" class="btn btn-outline-info">Learn More</button>
@@ -35,4 +29,6 @@
     </div>
 
 </div>
+
 }
+
