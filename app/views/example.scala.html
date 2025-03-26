@@ -1,0 +1,34 @@
+@(bookList: Seq[DataModel])
+
+@main("Find Book"){
+<h1>Google Book Api Project</h1>
+<div class="container h-100 d-flex justify-content-center ">
+
+    <div class="p-5 mb-4 bg-secondary-subtle rounded-3 ">
+        <div class="container-fluid py-5 ">
+
+            <div class="row justify-content-center">
+                @bookList.take(3).map{ book =>
+                <div class="card p-4 " style="width: 18rem; ">
+                    <div class="card-body">
+
+                        <h5 class="card-title">@book.title
+                        </h5>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Page Count: book.pageCount
+                            </li>
+                    </ul>
+                    <div class="card-body">
+                        <button type="button" class="btn btn-outline-info">Learn More</button>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>
+
+}
+

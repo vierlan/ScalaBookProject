@@ -11,3 +11,9 @@ case class GoogleBook(
 object GoogleBook {
   implicit val formats: OFormat[GoogleBook] = Json.format[GoogleBook]
 }
+
+case class ResultList(items: Seq[GoogleBook])
+
+object ResultList {
+  implicit val formats: OFormat[ResultList] = Json.format[ResultList]
+}

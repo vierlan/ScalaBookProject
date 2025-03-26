@@ -51,7 +51,7 @@ class ApplicationController @Inject()(
       case Right(item: Seq[DataModel]) => if (item.length < 1 ) {
       BadRequest("Unable to find any books")}
       else
-     {Ok {Json.toJson(item)}}
+     {Ok(views.html.example(item))}
       case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
     }
   }
@@ -68,15 +68,32 @@ class ApplicationController @Inject()(
     }
   }
 
-  def getGoogleBook(search: String, term: String): Action[AnyContent] = Action.async { implicit request => service.getGoogleBook(search = search, term = term).value.map {
+  def getGoogleBook(search: String): Action[AnyContent] = Action.async { implicit request =>
+
+    service.getGoogleBook(search = search).value.map {
     case Right(book) => Ok (Json.toJson(book))
       case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
     }
   }
 
-    def hobbit(): Action[AnyContent] = Action { implicit request =>
+  def hobbit(): Action[AnyContent] = Action { implicit request =>
       Ok(views.html.hobbit())
     }
 
 
   }
+
+
+  def googleBookSearch(search: String): Action[AnyContent] = Action.async { implicit request =>
+
+    service.getGoogleBook(search = search).value.map {
+      case Right(book) => Ok(views.html.searchResults(book))
+      case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
+    }
+  }
+//  def example(): Action[AnyContent] = Action.async {implicit request =>
+//    Future.successful(Ok(views.html.example()))
+//  }
+
+}
+
