@@ -7,7 +7,10 @@ case class Book(
                   isbn: String,
                  title: String,
                   pageCount: Int,
-                 description: String) {
+//                  thumbnailUrl: String,
+                 description: String,
+
+               ) {
 
 }
 

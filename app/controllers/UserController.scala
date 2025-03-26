@@ -1,12 +1,9 @@
 package controllers
 
-import akka.util.Helpers.Requiring
 import models.{APIError, User}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
 import repositories.UserRepository
-import services.LibraryService
-
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import javax.inject.Singleton
