@@ -6,6 +6,7 @@ case class VolumeInfo(
                      title: String,
                      pageCount: Option[Int],
                      description: Option[String],
+                     imageLinks: Option[ImageLinks],
                      industryIdentifiers: Seq[IndustryIdentifier]
                      )
 
