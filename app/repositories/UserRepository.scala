@@ -2,7 +2,7 @@ package repositories
 
 import models.{APIError, User}
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model.Filters.empty
+import org.mongodb.scala.model.Filters.{empty, equal}
 import org.mongodb.scala.model._
 import org.mongodb.scala.result
 import play.api.libs.json.JsError
@@ -73,4 +73,9 @@ class UserRepository @Inject()(
 
   def deleteAll(): Future[Unit] = collection.deleteMany(empty()).toFuture().map(_ => ()) //Hint: needed for tests
 
+  def validateCredentials(username: String, password: String): Future[Option[User]] = {
+    // Example: Query the database for the provided username and password
+    collection.find(Filters.and(equal("username", username), equal("password", password)))
+      .headOption()
+  }
 }

@@ -17,4 +17,7 @@ GET     /login     controllers.UserController.login
 POST     /validateLogin     controllers.UserController.validateLogin
 DELETE     /user/delete/:id   controllers.UserController.delete(id: String)
 
+GET     /userPage     controllers.UserController.userPage
+
+
 GET     /library/google/:search/:term      controllers.ApplicationController.getGoogleBook(search: String, term: String)

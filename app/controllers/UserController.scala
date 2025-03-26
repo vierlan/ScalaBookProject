@@ -4,6 +4,8 @@ import models.{APIError, User}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
 import repositories.UserRepository
+import services.UserService
+
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import javax.inject.Singleton
@@ -12,6 +14,7 @@ import javax.inject.Singleton
 class UserController @Inject()(
                                        val controllerComponents: ControllerComponents,
                                        val userRepository : UserRepository,
+                                       val userService: UserService,
                                        implicit val ec: ExecutionContext) extends BaseController {
 
   def create(): Action[JsValue] = Action.async(parse.json) { implicit request =>
@@ -22,22 +25,69 @@ class UserController @Inject()(
     }
   }
 
-  def login: Action[AnyContent] = Action {
+  def login(): Action[AnyContent] = Action {
     Ok(views.html.login())
   }
 
-  def validateLogin: Action[AnyContent] = Action { request =>
+  def validateLogin: Action[AnyContent] = Action.async (parse.anyContent) { request =>
     val loginVals = request.body.asFormUrlEncoded
-    Ok(views.html.userPage())
+
+    // Extract login credentials (e.g., username and password)
+    loginVals match {
+      case Some(values) =>
+        val usernameOpt = values.get("username").flatMap(_.headOption)
+        val passwordOpt = values.get("password").flatMap(_.headOption)
+
+        (usernameOpt, passwordOpt) match {
+          case (Some(username), Some(password)) =>
+            // Validate the user (this could involve querying the repository)
+            userRepository.validateCredentials(username, password).map {
+              case Some(user) =>
+                // Redirect to the userPage with the user object
+                Redirect(routes.UserController.userPage()).flashing(
+                  "userID" -> user._id, // You could pass the user ID or any other user data
+                  "username" -> user.name
+                )
+              case None =>
+                // Invalid login attempt
+                Redirect(routes.UserController.login.flashing(
+                  "error" -> "Invalid username or password"
+                )
+            }
+          case _ =>
+            // Missing credentials
+            Future.successful(
+              Redirect(routes.UserController.login()).flashing(
+                "error" -> "Please provide both username and password"
+              )
+            )
+        }
+      case None =>
+        // Invalid request payload
+        Future.successful(
+          Redirect(routes.UserController.login()).flashing(
+            "error" -> "Invalid login request"
+          )
+        )
+    }
   }
 
-  def createUser(): Action[JsValue] = Action.async(parse.json) { request =>
-    request.body.validate[User].fold(
-      errors => Future.successful(BadRequest(Json.obj("message" -> "Invalid JSON"))),
-      user => {
-        userRepository.create(user).map(createdUser => Created(Json.toJson(createdUser)))
-      }
-    )
+
+  def userPage(): Action[AnyContent] = Action { request =>
+    // Extract flashed data (userID, username, etc.)
+    val userID = request.flash.get("userID")
+    val username = request.flash.get("username")
+
+    userID match {
+      case Some(id) =>
+        // Render the userPage with the user details
+        Ok(views.html.userPage(id, username.getOrElse("Unknown User")))
+      case None =>
+        // If user data is missing, redirect back to login
+        Redirect(routes.UserController.login()).flashing(
+          "error" -> "User information missing"
+        )
+    }
   }
 
   def read(id: String): Action[AnyContent] = Action.async { implicit request =>
