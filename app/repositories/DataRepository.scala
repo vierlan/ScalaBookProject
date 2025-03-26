@@ -1,17 +1,21 @@
 package repositories
 
+
 import com.google.inject.ImplementedBy
 import models.{APIError, DataModel}
+
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Filters.empty
 import org.mongodb.scala.model._
 import org.mongodb.scala.result
 import play.api.libs.json.JsError
+
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+
 
 @ImplementedBy(classOf[DataRepository])
 trait DataRepositoryTrait {
@@ -60,9 +64,11 @@ class DataRepository @Inject() (
       .map(_ => Right(book))
 
   def byID(id: String): Bson =
+
     Filters.and(
       Filters.equal("_id", id)
     )
+
 
   def read(id: String): Future[Either[APIError.BadAPIResponse, Option[DataModel]]] =
     collection.find(byID(id)).headOption.map {
@@ -84,6 +90,7 @@ class DataRepository @Inject() (
     collection.deleteOne(
       filter = byID(id)
     ).toFuture().map(Right(_)) // Do validation here instead of this.
+
 
   def deleteAll(): Future[Unit] = collection.deleteMany(empty()).toFuture().map(_ => ()) //Hint: needed for tests
 

@@ -1,5 +1,6 @@
 package controllers
 
+
 import akka.util.Helpers.Requiring
 import models.{APIError, DataModel}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
@@ -19,6 +20,7 @@ class ApplicationController @Inject()(
                                        val repositoryService: RepositoryService)(
                                        implicit val ec: ExecutionContext) extends BaseController {
 
+
   def create(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[DataModel] match {
       case JsSuccess(dataModel, _) =>
@@ -26,6 +28,7 @@ class ApplicationController @Inject()(
       case JsError(_) => Future(BadRequest)
     }
   }
+
 
   def read(id: String): Action[AnyContent] = Action.async { implicit request =>
     repositoryService.read(id).map {
@@ -71,6 +74,7 @@ class ApplicationController @Inject()(
   def getGoogleBook(search: String, term: String): Action[AnyContent] = Action.async { implicit request => service.getGoogleBook(search = search, term = term).value.map {
     case Right(book) => Ok (Json.toJson(book))
       case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
+
     }
   }
 
