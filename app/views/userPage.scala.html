@@ -27,5 +27,15 @@
         }
     </div>
     }
+    <div class="container">
+        <h1>Search for Books</h1>
+
+        <form action="@routes.HomeController.search()" method="GET" class="search-form">
+            <input type="text" name="query" placeholder="Search for books..." required>
+            <button type="submit" class="btn">Search</button>
+        </form>
+
+        <p>Use keywords like 'intitle:', 'inauthor:', 'subject:' for more specific searches.</p>
+    </div>
 </div>
 }
