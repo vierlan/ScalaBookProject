@@ -74,4 +74,9 @@ class ApplicationController @Inject()(
     }
   }
 
-}
+    def hobbit(): Action[AnyContent] = Action { implicit request =>
+      Ok(views.html.hobbit())
+    }
+
+
+  }
