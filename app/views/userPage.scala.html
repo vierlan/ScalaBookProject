@@ -13,7 +13,7 @@
     <div class="book-grid">
         @for(book <- books) {
         <div class="book-card">
-            <img src="@book.imageLinks" alt="@book.title cover">
+            <img src="@extractImageUrl(book.imageLinks)" alt="@book.title cover">
             <h3>@book.title</h3>
             <p>
                 @if(book.description.length > 50) {
@@ -48,3 +48,12 @@
 
 </div>
 }
+@* Helper function to extract the URL from ImageLinks wrapper *@
+@extractImageUrl(url: String) = @{
+if (url != null && url.startsWith("ImageLinks(") && url.endsWith(")")) {
+url.substring("ImageLinks(".length, url.length - 1)
+} else {
+url
+}
+}
+
