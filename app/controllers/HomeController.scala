@@ -35,7 +35,7 @@ class HomeController @Inject()(
   def search(): Action[AnyContent] = Action.async { implicit request =>
     val query = request.getQueryString("query").getOrElse("")
     service.getGoogleBook(search = query).value.map {
-      case Right(book) => Ok(views.html.searchResults(book))
+      case Right(book) => Ok(views.html.bookShow(book))
       case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
     }
   }
