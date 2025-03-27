@@ -1,10 +1,11 @@
 package controllers
 
 
-import models.Book
-import play.api.libs.json.{JsArray, JsValue}
+import models.{Book, ResultList}
+import play.api.libs.json.{JsArray, JsValue, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc._
+import services.LibraryService
 
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
@@ -17,6 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class HomeController @Inject()(
                                 val controllerComponents: ControllerComponents,
+                                val service : LibraryService,
                                 ws: WSClient
                               )(implicit ec: ExecutionContext) extends BaseController {
   /**
@@ -32,45 +34,33 @@ class HomeController @Inject()(
 
   def search(): Action[AnyContent] = Action.async { implicit request =>
     val query = request.getQueryString("query").getOrElse("")
-
-    if (query.isEmpty) {
-      Future.successful(Redirect(routes.HomeController.index()))
-    } else {
-      val encodedQuery = java.net.URLEncoder.encode(query, "UTF-8")
-      val url = s"https://www.googleapis.com/books/v1/volumes?q=$encodedQuery"
-
-      ws.url(url).get().map { response =>
-        val books = parseGoogleBooksResponse(response.json)
-        Ok(views.html.searchResults(books))
-      }
+    service.getGoogleBook(search = query).value.map {
+      case Right(book) => Ok(views.html.searchResults(book))
+      case Left(_) => BadRequest(Json.toJson("Unable to find any books"))
     }
   }
 
-  private def parseGoogleBooksResponse(json: JsValue): Seq[Book] = {
-    val items = (json \ "items").asOpt[JsArray].getOrElse(JsArray())
+//  def bookSearch(books: ResultList):List[Book] = {
+//    for (book <- books.items) yield {}
+//  }
 
-    items.value.flatMap { item =>
-      val volumeInfo = (item \ "volumeInfo")
+//  def search(): Action[AnyContent] = Action.async { implicit request =>
+//    val query = request.getQueryString("query").getOrElse("")
+//
+//    if (query.isEmpty) {
+//      Future.successful(Redirect(routes.HomeController.index()))
+//    } else {
+//      val encodedQuery = java.net.URLEncoder.encode(query, "UTF-8")
+//      val url = s"https://www.googleapis.com/books/v1/volumes?q=$encodedQuery"
+//
+//      ws.url(url).get().map { response =>
+//        val books = parseGoogleBooksResponse(response.json)
+//        Ok(views.html.bookShow(books))
+//      }
+//    }
+//  }
 
-      for {
-        title <- (volumeInfo \ "title").asOpt[String]
-        // Use a default ISBN if not available
-        isbn = (volumeInfo \ "industryIdentifiers").asOpt[JsArray]
-          .flatMap(_.value.headOption)
-          .flatMap(id => (id \ "identifier").asOpt[String])
-          .getOrElse("Unknown")
-        // Use default values for optional fields
-        pageCount = (volumeInfo \ "pageCount").asOpt[Int].getOrElse(0)
-        description = (volumeInfo \ "description").asOpt[String].getOrElse("No description available")
-        thumbnailUrl = (volumeInfo \ "imageLinks" \ "thumbnail").asOpt[String]
-          .getOrElse("/assets/images/no-cover.jpg")
-      } yield Book(
-        isbn = isbn,
-        title = title,
-        pageCount = pageCount,
-        thumbnailUrl = thumbnailUrl,
-        description = description
-      )
-    }.toSeq
-  }
+//
+//
 }
+

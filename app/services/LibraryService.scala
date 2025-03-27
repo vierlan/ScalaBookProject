@@ -43,15 +43,13 @@ class LibraryService @Inject()(connector: LibraryConnector) {
           isbn = googleBook.volumeInfo.industryIdentifiers.find(_.`type` == "ISBN_13").map(_.identifier).getOrElse(""),
           title = googleBook.volumeInfo.title,
           pageCount = googleBook.volumeInfo.pageCount.getOrElse(0),
-          thumbnailUrl = googleBook.volumeInfo.thumbnailUrl.mkString,
+          imageLinks = googleBook.volumeInfo.imageLinks.mkString,
           description = googleBook.volumeInfo.description.getOrElse("No description provided")
+//            description = googleBook.volumeInfo.description.getOrElse("No description provided")
         )
       }
     }
   }
-
-
-
 }
 
 

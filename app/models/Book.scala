@@ -7,7 +7,7 @@ case class Book(
                   isbn: String,
                  title: String,
                   pageCount: Int,
-                 thumbnailUrl: String,
+                  imageLinks: String,
                  description: String,
 
                ) {
@@ -28,9 +28,8 @@ object Book {
   def toDataModel(book: Book): DataModel = {
     DataModel(
       _id = book.isbn,
-      name = book.title,
+      title = book.title,
       description = book.description,
-      thumbnailUrl = book.thumbnailUrl,
       pageCount = book.pageCount
     )
   }

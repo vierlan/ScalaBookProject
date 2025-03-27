@@ -87,7 +87,7 @@ class BookController @Inject()(
       isbn = data.getOrElse("isbn", Seq("Unknown")).head,
       title = data.getOrElse("title", Seq("Unknown")).head,
       pageCount = data.getOrElse("pageCount", Seq("0")).head.toInt,
-      thumbnailUrl = data.getOrElse("thumbnailUrl", Seq("/assets/images/no-cover.jpg")).head,
+      imageLinks = data.getOrElse("imageLinks", Seq("/assets/images/no-cove.jpg")).head,
       description = data.getOrElse("description", Seq("No description available")).head
     )
   }

@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import javax.inject.Singleton
 
 @Singleton
-class UserController @Inject()(
+class                            UserController @Inject()(
                                 val controllerComponents: ControllerComponents,
                                 val userRepository : UserRepository,
                                 val userService: UserService,

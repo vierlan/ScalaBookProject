@@ -13,10 +13,15 @@
     <div class="book-grid">
         @for(book <- books) {
         <div class="book-card">
-            <img src="@book.thumbnailUrl" alt="@book.title cover">
+            <img src="@book.imageLinks" alt="@book.title cover">
             <h3>@book.title</h3>
-            <p>Pages: @book.pageCount</p>
-            <p>@if(book.description.length > 100) {@book.description.substring(0, 100)}... else {@book.description}</p>
+            <p>
+                @if(book.description.length > 50) {
+                @book.description.substring(0, 50)...
+                } else {
+                @book.description
+                }
+            </p>
 
             <form action="@routes.BookController.removeFromFavorites()" method="POST">
                 @helper.CSRF.formField
@@ -27,15 +32,19 @@
         }
     </div>
     }
+
     <div class="container">
         <h1>Search for Books</h1>
 
         <form action="@routes.HomeController.search()" method="GET" class="search-form">
-            <input type="text" name="query" placeholder="Search for books..." required>
+            <label>
+                <input type="text" name="query" placeholder="Search for books..." required>
+            </label>
             <button type="submit" class="btn">Search</button>
         </form>
 
-        <p>Use keywords like 'intitle:', 'inauthor:', 'subject:' for more specific searches.</p>
+        <p>Search for some great reads.</p>
     </div>
+
 </div>
 }

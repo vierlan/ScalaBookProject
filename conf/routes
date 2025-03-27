@@ -4,12 +4,7 @@ GET     /                           controllers.HomeController.index()
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-
-
 GET     /userPage     controllers.UserController.userPage()
-
-
-GET     /library/google/:search/:term      controllers.ApplicationController.getGoogleBook(search: String, term: String)
 
 # Home page
 GET     /                           controllers.HomeController.index()
